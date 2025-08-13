@@ -1,0 +1,101 @@
+---
+import Welcome from '../components/Welcome.astro';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Home - Astro Portfolio">
+  <nav class="nav">
+    <div class="nav-container">
+      <a href="/" class="nav-logo">Portfolio</a>
+      <div class="nav-links">
+        <a href="/" class="active">Home</a>
+        <a href="/blog">Blog</a>
+      </div>
+    </div>
+  </nav>
+  
+  <Welcome />
+  
+  <footer class="footer">
+    <div class="footer-container">
+      <p>&copy; 2025 Your Name. All rights reserved.</p>
+    </div>
+  </footer>
+</Layout>
+
+<style>
+  .nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+  }
+
+  .nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    height: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .nav-logo {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: #3b82f6;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .nav-logo:hover {
+    color: #2563eb;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+  }
+
+  .nav-links a {
+    text-decoration: none;
+    color: #6b7280;
+    font-weight: 500;
+    font-family: Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover,
+  .nav-links a.active {
+    color: #3b82f6;
+  }
+
+  .footer {
+    background: #111827;
+    color: #9ca3af;
+    padding: 2rem 0;
+    font-family: Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif;
+  }
+
+  .footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    text-align: center;
+  }
+
+  @media (max-width: 768px) {
+    .nav-container {
+      padding: 0 1rem;
+    }
+
+    .nav-links {
+      gap: 1rem;
+    }
+  }
+</style>
