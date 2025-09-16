@@ -17,6 +17,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          fetch-tags: true
 
       - name: Push --mirror to Azure DevOps (HTTPS + PAT)
         env:
@@ -24,15 +25,17 @@ jobs:
         run: |
           set -euo pipefail
           AZDO_ORG="AvanquestSPG"
-          AZDO_PROJECT="Avanquest"
+          AZDO_PROJECT="Test%20Project"
           AZDO_REPO="bolt-test-project"
 
           git config --global user.email "mirror-bot@avanquest.com"
           git config --global user.name  "GitHub → Azure DevOps Mirror"
 
           DEST_URL="https://dev.azure.com/${AZDO_ORG}/${AZDO_PROJECT}/_git/${AZDO_REPO}"
-          AUTH_HEADER=$(printf ":${AZDO_PAT}" | base64 | tr -d '\n')
 
-          # Backfill & keep in sync (all refs)
-          git -c http.extraheader="AUTHORIZATION: Basic ${AUTH_HEADER}" \
-              push --prune --mirror "${DEST_URL}"
+          # Use an auth header instead of embedding PAT in URL
+          AUTH_HEADER=$(printf ":${AZDO_PAT}" | base64 | tr -d '\n')
+          git config --global http.https://dev.azure.com/.extraheader "AUTHORIZATION: Basic ${AUTH_HEADER}"
+
+          # Push ALL refs (branches, tags, notes) and prune deletions
+          (git push --prune --mirror "${DEST_URL}") || (sleep 3 && git push --prune --mirror "${DEST_URL}")
