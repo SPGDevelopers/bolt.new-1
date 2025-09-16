@@ -1,0 +1,42 @@
+name: Mirror to Azure DevOps
+
+on:
+  push:
+    branches: ['**']
+  delete:
+    branches: ['**']
+  create:
+    branches: ['**']
+  workflow_dispatch:
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push --mirror to Azure DevOps
+        env:
+          AZDO_PAT: ${{ secrets.AZDO_PAT }}
+          AZDO_ORG: ${{ env.AZDO_ORG || 'AvanquestSPG' }}
+          AZDO_PROJECT: ${{ env.AZDO_PROJECT || 'Avanquest' }}
+          AZDO_REPO: ${{ env.AZDO_REPO || 'bolt-test-project' }}
+        run: |
+          set -euo pipefail
+
+          # Configure an identity for the bot
+          git config --global user.email "mirror-bot@avanquest.com"
+          git config --global user.name  "GitHub → Azure DevOps Mirror"
+
+          # Build authenticated DevOps URL
+          DEVOPS_URL="https://jesus.rivera:${AZDO_PAT}@dev.azure.com/${AZDO_ORG}/${AZDO_PROJECT}/_git/${AZDO_REPO}"
+
+          # Create the repo if someone forgot (safe if it already exists)
+          # (Optional) you can omit this block if repo definitely exists.
+
+          # Mirror: pushes ALL refs (branches, tags, notes) and keeps deletions in sync
+          git push --prune --mirror "$DEVOPS_URL"
+
