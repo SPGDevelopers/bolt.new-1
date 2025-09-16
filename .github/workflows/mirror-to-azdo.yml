@@ -2,11 +2,11 @@ name: Mirror to Azure DevOps
 
 on:
   push:
-    branches: ['**']
+    branches: ["**"]
   delete:
-    branches: ['**']
+    branches: ["**"]
   create:
-    branches: ['**']
+    branches: ["**"]
   workflow_dispatch:
 
 jobs:
@@ -18,25 +18,21 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Push --mirror to Azure DevOps
+      - name: Push --mirror to Azure DevOps (HTTPS + PAT)
         env:
           AZDO_PAT: ${{ secrets.AZDO_PAT }}
-          AZDO_ORG: ${{ env.AZDO_ORG || 'AvanquestSPG' }}
-          AZDO_PROJECT: ${{ env.AZDO_PROJECT || 'Avanquest' }}
-          AZDO_REPO: ${{ env.AZDO_REPO || 'bolt-test-project' }}
         run: |
           set -euo pipefail
+          AZDO_ORG="AvanquestSPG"
+          AZDO_PROJECT="Avanquest"
+          AZDO_REPO="bolt-test-project"
 
-          # Configure an identity for the bot
           git config --global user.email "mirror-bot@avanquest.com"
           git config --global user.name  "GitHub → Azure DevOps Mirror"
 
-          # Build authenticated DevOps URL
-          DEVOPS_URL="https://jesus.rivera:${AZDO_PAT}@dev.azure.com/${AZDO_ORG}/${AZDO_PROJECT}/_git/${AZDO_REPO}"
+          DEST_URL="https://dev.azure.com/${AZDO_ORG}/${AZDO_PROJECT}/_git/${AZDO_REPO}"
+          AUTH_HEADER=$(printf ":${AZDO_PAT}" | base64 | tr -d '\n')
 
-          # Create the repo if someone forgot (safe if it already exists)
-          # (Optional) you can omit this block if repo definitely exists.
-
-          # Mirror: pushes ALL refs (branches, tags, notes) and keeps deletions in sync
-          git push --prune --mirror "$DEVOPS_URL"
-
+          # Backfill & keep in sync (all refs)
+          git -c http.extraheader="AUTHORIZATION: Basic ${AUTH_HEADER}" \
+              push --prune --mirror "${DEST_URL}"
